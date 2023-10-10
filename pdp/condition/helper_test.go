@@ -2,16 +2,27 @@ package condition
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 )
 
 func TestIpCondition_Evaluate(t *testing.T) {
-	m := map[string]string{
-		"2": "2",
+
+	var ms ConditionSet
+	ms = make(map[string]ConditionKeyValues)
+	ms["IpAddress"] = make(ConditionKeyValues)
+	ms["IpAddress"]["req:IpAddress"] = []string{"3", "4"}
+
+	for k, v := range ms {
+		fmt.Printf("条件操作符=%s", k)
+
+		for k1, v1 := range v {
+			fmt.Printf("条件键=%s, 条件值=%s", k1, v1)
+
+		}
 	}
 
-	v, ok := m["1"]
-	k := reflect.ValueOf(&v).IsZero()
-	fmt.Println(v, ok, k)
 }
+
+type ConditionSet map[string]ConditionKeyValues
+
+type ConditionKeyValues map[string][]string

@@ -6,23 +6,23 @@ import (
 )
 
 type boolCondition struct {
-	baseKeyedCondition
+	baseCondition
 }
 
-func newBoolCondition(key string, values []interface{}) KeyedCondition {
+func newBoolCondition(key string, values []interface{}) (types.Condition, error) {
 	return &boolCondition{
-		baseKeyedCondition: baseKeyedCondition{
+		baseCondition: baseCondition{
 			key:    key,
 			values: values,
 		},
-	}
+	}, nil
 }
 
 func (c *boolCondition) GetName() string {
 	return consts.Bool
 }
 
-func (c *boolCondition) Evaluate(ctxValue interface{}, requestCtx types.EvalContextor) bool {
+func (c *boolCondition) Evaluate(ctxValue interface{}, _ types.EvalContextor) bool {
 	values := c.GetValues()
 	if len(values) == 0 {
 		return false

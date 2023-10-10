@@ -6,26 +6,7 @@ import (
 	"reflect"
 )
 
-// Condition 条件接口
-type Condition interface {
-	// GetName 返回条件名称
-	GetName() string
-
-	// Evaluate 返回条件是否满足, ctxValue为条件值(单个), request为请求值.
-	Evaluate(ctxValue interface{}, requestCtx types.EvalContextor) bool
-}
-
-type KeyedCondition interface {
-	Condition
-
-	// GetKey 返回条件的键
-	GetKey() string
-
-	// GetValues 返回条件的值
-	GetValues() []interface{}
-}
-
-type conditionFunc func(key string, values []interface{}) KeyedCondition
+type conditionFunc func(key string, values []interface{}) (types.Condition, error)
 
 var conditionFactories map[string]conditionFunc
 
@@ -92,14 +73,18 @@ func init() {
 }
 
 type IfExistsCondition struct {
-	condition KeyedCondition
+	condition types.Condition
 }
 
 func newIfExistsCondition(fn conditionFunc) conditionFunc {
-	return func(key string, values []interface{}) KeyedCondition {
-		return &IfExistsCondition{
-			condition: fn(key, values),
+	return func(key string, values []interface{}) (types.Condition, error) {
+		condition, err := fn(key, values)
+		if err != nil {
+			return nil, err
 		}
+		return &IfExistsCondition{
+			condition: condition,
+		}, nil
 	}
 }
 
@@ -126,14 +111,18 @@ func (c *IfExistsCondition) GetValues() []interface{} {
 }
 
 type ForAllValuesCondition struct {
-	condition KeyedCondition
+	condition types.Condition
 }
 
 func newForAllValuesCondition(fn conditionFunc) conditionFunc {
-	return func(key string, values []interface{}) KeyedCondition {
-		return &ForAllValuesCondition{
-			condition: fn(key, values),
+	return func(key string, values []interface{}) (types.Condition, error) {
+		condition, err := fn(key, values)
+		if err != nil {
+			return nil, err
 		}
+		return &ForAllValuesCondition{
+			condition: condition,
+		}, nil
 	}
 }
 
@@ -166,14 +155,18 @@ func (c *ForAllValuesCondition) GetValues() []interface{} {
 }
 
 type ForAnyValueCondition struct {
-	condition KeyedCondition
+	condition types.Condition
 }
 
 func newForAnyValueCondition(fn conditionFunc) conditionFunc {
-	return func(key string, values []interface{}) KeyedCondition {
-		return &ForAnyValueCondition{
-			condition: fn(key, values),
+	return func(key string, values []interface{}) (types.Condition, error) {
+		condition, err := fn(key, values)
+		if err != nil {
+			return nil, err
 		}
+		return &ForAnyValueCondition{
+			condition: condition,
+		}, nil
 	}
 }
 

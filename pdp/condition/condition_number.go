@@ -6,25 +6,25 @@ import (
 )
 
 type numberCondition struct {
-	baseKeyedCondition
+	baseCondition
 	name string
 	// compareFunc 比较函数, a为条件值, b为请求值
 	compareFunc func(a, b interface{}) bool
 }
 
-func newNumberCondition(name string, key string, values []interface{}, compareFunc func(a, b interface{}) bool) KeyedCondition {
+func newNumberCondition(name string, key string, values []interface{}, compareFunc func(a, b interface{}) bool) (types.Condition, error) {
 	return &numberCondition{
-		baseKeyedCondition: baseKeyedCondition{
+		baseCondition: baseCondition{
 			key:    key,
 			values: values,
 		},
 		name:        name,
 		compareFunc: compareFunc,
-	}
+	}, nil
 }
 
 // newNumberEqualsCondition NumberEquals 请求值等于任意一个条件值。
-func newNumberEqualsCondition(key string, values []interface{}) KeyedCondition {
+func newNumberEqualsCondition(key string, values []interface{}) (types.Condition, error) {
 	return newNumberCondition(consts.NumberEquals, key, values, func(a, b interface{}) bool {
 		aNum, aOK := castNumber(a)
 		bNum, bOK := castNumber(b)
@@ -33,7 +33,7 @@ func newNumberEqualsCondition(key string, values []interface{}) KeyedCondition {
 }
 
 // newNumberNotEqualsCondition NumberNotEquals 请求值不等于所有条件值。
-func newNumberNotEqualsCondition(key string, values []interface{}) KeyedCondition {
+func newNumberNotEqualsCondition(key string, values []interface{}) (types.Condition, error) {
 	return newNumberCondition(consts.NumberNotEquals, key, values, func(a, b interface{}) bool {
 		aNum, aOK := castNumber(a)
 		bNum, bOK := castNumber(b)
@@ -42,7 +42,7 @@ func newNumberNotEqualsCondition(key string, values []interface{}) KeyedConditio
 }
 
 // newNumberLessThanCondition NumberLessThan 请求值小于所有条件值。
-func newNumberLessThanCondition(key string, values []interface{}) KeyedCondition {
+func newNumberLessThanCondition(key string, values []interface{}) (types.Condition, error) {
 	return newNumberCondition(consts.NumberLessThan, key, values, func(a, b interface{}) bool {
 		aNum, aOK := castNumber(a)
 		bNum, bOK := castNumber(b)
@@ -51,7 +51,7 @@ func newNumberLessThanCondition(key string, values []interface{}) KeyedCondition
 }
 
 // newNumberLessThanEqualsCondition NumberLessThanEquals 请求值小于等于所有条件值。
-func newNumberLessThanEqualsCondition(key string, values []interface{}) KeyedCondition {
+func newNumberLessThanEqualsCondition(key string, values []interface{}) (types.Condition, error) {
 	return newNumberCondition(consts.NumberLessThanEquals, key, values, func(a, b interface{}) bool {
 		aNum, aOK := castNumber(a)
 		bNum, bOK := castNumber(b)
@@ -60,7 +60,7 @@ func newNumberLessThanEqualsCondition(key string, values []interface{}) KeyedCon
 }
 
 // newNumberGreaterThanCondition NumberGreaterThan 请求值大于所有条件值。
-func newNumberGreaterThanCondition(key string, values []interface{}) KeyedCondition {
+func newNumberGreaterThanCondition(key string, values []interface{}) (types.Condition, error) {
 	return newNumberCondition(consts.NumberGreaterThan, key, values, func(a, b interface{}) bool {
 		aNum, aOK := castNumber(a)
 		bNum, bOK := castNumber(b)
@@ -69,7 +69,7 @@ func newNumberGreaterThanCondition(key string, values []interface{}) KeyedCondit
 }
 
 // newNumberGreaterThanEqualsCondition NumberGreaterThanEquals 请求值大于等于所有条件值。
-func newNumberGreaterThanEqualsCondition(key string, values []interface{}) KeyedCondition {
+func newNumberGreaterThanEqualsCondition(key string, values []interface{}) (types.Condition, error) {
 	return newNumberCondition(consts.NumberGreaterThanEquals, key, values, func(a, b interface{}) bool {
 		aNum, aOK := castNumber(a)
 		bNum, bOK := castNumber(b)
@@ -81,13 +81,6 @@ func (c *numberCondition) GetName() string {
 	return c.name
 }
 
-func (c *numberCondition) Evaluate(ctxValue interface{}, _ types.EvalContextor) bool {
-	values := c.GetValues()
-
-	for _, v := range values {
-		if c.compareFunc(v, ctxValue) {
-			return true
-		}
-	}
-	return false
+func (c *numberCondition) Evaluate(ctxValue interface{}, requestCtx types.EvalContextor) bool {
+	return c.forOr(ctxValue, requestCtx, c.compareFunc)
 }

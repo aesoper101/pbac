@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // castNumber 将值转换为decimal.Decimal
@@ -57,6 +58,9 @@ func castCarbon(value interface{}) (carbon.Carbon, bool) {
 	switch value := value.(type) {
 	case string:
 		c := carbon.Parse(value)
+		return c, c.IsValid()
+	case time.Time:
+		c := carbon.CreateFromStdTime(value)
 		return c, c.IsValid()
 	default:
 		return carbon.NewCarbon(), false

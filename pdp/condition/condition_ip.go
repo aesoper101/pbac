@@ -7,25 +7,25 @@ import (
 )
 
 type ipCondition struct {
-	baseKeyedCondition
+	baseCondition
 	name string
 	// compareFunc 比较函数, a为条件值, b为请求值
 	compareFunc func(a, b interface{}) bool
 }
 
-func newIpCondition(name string, key string, values []interface{}, compareFunc func(a, b interface{}) bool) KeyedCondition {
+func newIpCondition(name string, key string, values []interface{}, compareFunc func(a, b interface{}) bool) (types.Condition, error) {
 	return &ipCondition{
-		baseKeyedCondition: baseKeyedCondition{
+		baseCondition: baseCondition{
 			key:    key,
 			values: values,
 		},
 		name:        name,
 		compareFunc: compareFunc,
-	}
+	}, nil
 }
 
 // newIpAddressCondition IpAddress 请求值等于任意一个条件值。
-func newIpAddressCondition(key string, values []interface{}) KeyedCondition {
+func newIpAddressCondition(key string, values []interface{}) (types.Condition, error) {
 	return newIpCondition(consts.IpAddress, key, values, func(a, b interface{}) bool {
 		if !isString(a) || !isString(b) {
 			return false
@@ -45,7 +45,7 @@ func newIpAddressCondition(key string, values []interface{}) KeyedCondition {
 }
 
 // newNotIpAddressCondition NotIpAddress 请求值不等于所有条件值。
-func newNotIpAddressCondition(key string, values []interface{}) KeyedCondition {
+func newNotIpAddressCondition(key string, values []interface{}) (types.Condition, error) {
 	return newIpCondition(consts.NotIpAddress, key, values, func(a, b interface{}) bool {
 		if !isString(a) || !isString(b) {
 			return false
@@ -67,16 +67,5 @@ func (c *ipCondition) GetName() string {
 }
 
 func (c *ipCondition) Evaluate(ctxValue interface{}, requestCtx types.EvalContextor) bool {
-	values := c.GetValues()
-	if len(values) == 0 {
-		return false
-	}
-
-	for _, v := range values {
-		if c.compareFunc(v, ctxValue) {
-			return true
-		}
-	}
-
-	return false
+	return c.forOr(ctxValue, requestCtx, c.compareFunc)
 }

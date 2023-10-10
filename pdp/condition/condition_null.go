@@ -6,16 +6,16 @@ import (
 )
 
 type nullCondition struct {
-	baseKeyedCondition
+	baseCondition
 }
 
-func newNullCondition(key string, values []interface{}) KeyedCondition {
+func newNullCondition(key string, values []interface{}) (types.Condition, error) {
 	return &nullCondition{
-		baseKeyedCondition: baseKeyedCondition{
+		baseCondition: baseCondition{
 			key:    key,
 			values: values,
 		},
-	}
+	}, nil
 }
 
 func (c *nullCondition) GetName() string {
