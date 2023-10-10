@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-type conditionFunc func(key string, values []interface{}) (types.Condition, error)
+type conditionFunc func(key string, values []string) (types.Condition, error)
 
 var conditionFactories map[string]conditionFunc
 

@@ -9,7 +9,7 @@ type nullCondition struct {
 	baseCondition
 }
 
-func newNullCondition(key string, values []interface{}) (types.Condition, error) {
+func newNullCondition(key string, values []string) (types.Condition, error) {
 	return &nullCondition{
 		baseCondition: baseCondition{
 			key:    key,
@@ -22,7 +22,7 @@ func (c *nullCondition) GetName() string {
 	return consts.Null
 }
 
-func (c *nullCondition) Evaluate(_ interface{}, requestCtx types.EvalContextor) bool {
+func (c *nullCondition) Evaluate(_ string, requestCtx types.EvalContextor) bool {
 	values := c.GetValues()
 	if len(values) == 0 {
 		return false

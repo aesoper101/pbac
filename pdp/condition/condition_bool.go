@@ -9,7 +9,7 @@ type boolCondition struct {
 	baseCondition
 }
 
-func newBoolCondition(key string, values []interface{}) (types.Condition, error) {
+func newBoolCondition(key string, values []string) (types.Condition, error) {
 	return &boolCondition{
 		baseCondition: baseCondition{
 			key:    key,
@@ -22,7 +22,7 @@ func (c *boolCondition) GetName() string {
 	return consts.Bool
 }
 
-func (c *boolCondition) Evaluate(ctxValue interface{}, _ types.EvalContextor) bool {
+func (c *boolCondition) Evaluate(ctxValue string, _ types.EvalContextor) bool {
 	values := c.GetValues()
 	if len(values) == 0 {
 		return false

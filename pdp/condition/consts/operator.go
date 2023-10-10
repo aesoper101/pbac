@@ -51,8 +51,3 @@ const (
 	// Null 要求请求值不存在或者值为null
 	Null = "Null"
 )
-
-const (
-	Or  = "Or"
-	And = "And"
-)

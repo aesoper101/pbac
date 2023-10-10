@@ -10,10 +10,10 @@ type StringCondition struct {
 	baseCondition
 	name string
 	// compareFunc 比较函数, a为条件值, b为请求值
-	compareFunc func(a, b interface{}) bool
+	compareFunc func(a, b string) bool
 }
 
-func newStringCondition(name string, key string, values []interface{}, compareFunc func(a, b interface{}) bool) (types.Condition, error) {
+func newStringCondition(name string, key string, values []string, compareFunc func(a, b string) bool) (types.Condition, error) {
 	return &StringCondition{
 		baseCondition: baseCondition{
 			key:    key,
@@ -25,44 +25,44 @@ func newStringCondition(name string, key string, values []interface{}, compareFu
 }
 
 // newStringEqualsCondition StringEquals 精确匹配，区分大小写, 请求值与任意一个条件值相同（区分大小写）
-func newStringEqualsCondition(key string, values []interface{}) (types.Condition, error) {
-	return newStringCondition(consts.StringEquals, key, values, func(a, b interface{}) bool {
-		return isString(a) && isString(b) && a == b
+func newStringEqualsCondition(key string, values []string) (types.Condition, error) {
+	return newStringCondition(consts.StringEquals, key, values, func(a, b string) bool {
+		return a == b
 	})
 }
 
 // newStringNotEqualsCondition StringNotEquals 否定匹配,请求值与所有条件值都不同（区分大小写）
-func newStringNotEqualsCondition(key string, values []interface{}) (types.Condition, error) {
-	return newStringCondition(consts.StringNotEquals, key, values, func(a, b interface{}) bool {
-		return isString(a) && isString(b) && a != b
+func newStringNotEqualsCondition(key string, values []string) (types.Condition, error) {
+	return newStringCondition(consts.StringNotEquals, key, values, func(a, b string) bool {
+		return a != b
 	})
 }
 
 // newStringEqualsIgnoreCaseCondition StringEqualsIgnoreCase 请求值与任意一个条件值相同（不区分大小写）
-func newStringEqualsIgnoreCaseCondition(key string, values []interface{}) (types.Condition, error) {
-	return newStringCondition(consts.StringEqualsIgnoreCase, key, values, func(a, b interface{}) bool {
-		return isString(a) && isString(b) && strings.EqualFold(a.(string), b.(string))
+func newStringEqualsIgnoreCaseCondition(key string, values []string) (types.Condition, error) {
+	return newStringCondition(consts.StringEqualsIgnoreCase, key, values, func(a, b string) bool {
+		return strings.EqualFold(a, b)
 	})
 }
 
 // newStringNotEqualsIgnoreCaseCondition StringNotEqualsIgnoreCase 请求值与所有条件值都不同（不区分大小写）
-func newStringNotEqualsIgnoreCaseCondition(key string, values []interface{}) (types.Condition, error) {
-	return newStringCondition(consts.StringNotEqualsIgnoreCase, key, values, func(a, b interface{}) bool {
-		return isString(a) && isString(b) && !strings.EqualFold(a.(string), b.(string))
+func newStringNotEqualsIgnoreCaseCondition(key string, values []string) (types.Condition, error) {
+	return newStringCondition(consts.StringNotEqualsIgnoreCase, key, values, func(a, b string) bool {
+		return !strings.EqualFold(a, b)
 	})
 }
 
 // newStringLikeCondition StringLike 请求值与任意一个条件值匹配（区分大小写）
-func newStringLikeCondition(key string, values []interface{}) (types.Condition, error) {
-	return newStringCondition(consts.StringLike, key, values, func(a, b interface{}) bool {
-		return isString(a) && isString(b) && stringMatch(b.(string), a.(string))
+func newStringLikeCondition(key string, values []string) (types.Condition, error) {
+	return newStringCondition(consts.StringLike, key, values, func(a, b string) bool {
+		return stringMatch(b, a)
 	})
 }
 
 // newStringNotLikeCondition StringNotLike 请求值与所有条件值都不匹配（区分大小写）
-func newStringNotLikeCondition(key string, values []interface{}) (types.Condition, error) {
-	return newStringCondition(consts.StringNotLike, key, values, func(a, b interface{}) bool {
-		return isString(a) && isString(b) && !stringMatch(b.(string), a.(string))
+func newStringNotLikeCondition(key string, values []string) (types.Condition, error) {
+	return newStringCondition(consts.StringNotLike, key, values, func(a, b string) bool {
+		return !stringMatch(b, a)
 	})
 }
 
@@ -70,6 +70,6 @@ func (c *StringCondition) GetName() string {
 	return c.name
 }
 
-func (c *StringCondition) Evaluate(ctxValue interface{}, ctx types.EvalContextor) bool {
+func (c *StringCondition) Evaluate(ctxValue string, ctx types.EvalContextor) bool {
 	return c.forOr(ctxValue, ctx, c.compareFunc)
 }
