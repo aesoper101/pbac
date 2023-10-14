@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aesoper101/pbac/internal/set"
+	"sort"
 )
 
 type ActionSet map[Action]struct{}
@@ -50,6 +51,24 @@ func (actionSet ActionSet) FuncMatch(matchFn func(Action, Action) bool, matchStr
 		}
 	}
 	return nset
+}
+
+// Match - 检查动作是否在动作集合中
+func (actionSet ActionSet) Match(s Action, specMatchFn ...func(Action, Action) bool) bool {
+	for r := range actionSet {
+		if r.Match(s) {
+			return true
+		}
+
+		for _, fn := range specMatchFn {
+			if fn(r, s) {
+				return true
+			}
+		}
+
+	}
+
+	return false
 }
 
 // ApplyFunc - 返回包含每个由'applyFn'处理的值的新集合。
@@ -143,6 +162,17 @@ func (actionSet ActionSet) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(actionSet.ToSlice())
+}
+
+// String - 返回动作集合的字符串表示形式
+func (actionSet ActionSet) String() string {
+	var actions []string
+	for action := range actionSet {
+		actions = append(actions, action.String())
+	}
+	sort.Strings(actions)
+
+	return fmt.Sprintf("%v", actions)
 }
 
 // NewActionSet - 返回新的动作集合

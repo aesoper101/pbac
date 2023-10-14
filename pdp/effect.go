@@ -21,5 +21,10 @@ func (e Effect) IsAllow() bool {
 
 // IsValid - 判断是否为有效的Effect
 func (e Effect) IsValid() bool {
-	return e == EffectAllow || e == EffectDeny
+	switch e {
+	case EffectAllow, EffectDeny:
+		return true
+	default:
+		return false
+	}
 }
